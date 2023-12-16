@@ -11,6 +11,9 @@ archives = ['ZIP', 'GZ', 'TAR']
 
 folder_list = ['image', 'video', 'documents', 'music', 'archives', 'others']
 
+Registered_extention = set()
+Unknown_extention = set()
+
 my_dict = {}
 
 for img in image:
@@ -85,6 +88,14 @@ def scan_folder(root_path, path):
                 move_files(root_path, item)
             else:
                 move_archives(root_path, item)
+
+        extension = get_extensions(file_name=item.name)
+        try:
+            container = my_dict[extension]
+            Registered_extention.add(extension)
+        except KeyError:
+            Unknown_extention.add(extension)
+
             
 def remove_empty_folders(path):
     for item in path.iterdir():
@@ -95,11 +106,29 @@ def remove_empty_folders(path):
             except OSError:
                 pass 
 
+def result(path):
+    for item in path.iterdir():
+        if item.is_dir():
+            print(item)
+            print('----------------------------------------------------------------')
+            result(item)
+        if item.is_file():
+            print(normalize(item.name))
+
+
 def main():
      
     path = Path(sys.argv[1]) 
     scan_folder(path, path)
     remove_empty_folders(path)
+    result(path)
+
+    if len(Registered_extention) > 0:
+        print(f'Registered extention: {Registered_extention}')
+
+    if len(Unknown_extention) > 0:
+        print(f'Unknown extention: {Unknown_extention}')
+    
 
 if __name__ == '__main__':
   

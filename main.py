@@ -24,7 +24,6 @@ for mus in music:
 for arc in archives:
     my_dict.setdefault(arc, 'Archives')
 
-
 CYRILLIC_SYMBOLS = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґ"
 TRANSLATION = ("a", "b", "v", "g", "d", "e", "e", "j", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u",
                "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya", "je", "i", "ji", "g")
@@ -59,6 +58,7 @@ def move_archives(root_path, path):
 
 
     new_name = normalize(path.name.replace(file_type, ''))
+    new_name, *extention = new_name.split('.')
     archive_folder = new_dir/new_name
     archive_folder.mkdir(exist_ok=True)
 

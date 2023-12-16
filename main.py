@@ -1,25 +1,38 @@
-from pathlib import Path
-from sys import argv
 import re
+import shutil
+import sys
+from pathlib import Path
+
+
+Image = list()
+Video = list()
+Documents = list()
+Music = list()
+Archives = list()
+Others = list()
+Extentions = set()
+Unknown_extentions = set()
 
 image = ['JPEG', 'PNG', 'JPG', 'SVG']
 video = ['AVI', 'MP4', 'MOV', 'MKV']
 documents = ['DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX']
 music = ['MP3', 'OGG', 'WAV', 'AMR']
-archives = ['ZIP', 'GZ', 'TAR']
+archives = ['ZIP', 'GZ', 'TAR'] 
+
+folder_list = ['image', 'video', 'documents', 'music', 'archives', 'others']
 
 my_dict = {}
 
 for img in image:
-    my_dict.setdefault(img, 'image')
+    my_dict.setdefault(img, 'Image')
 for vid in video:
-    my_dict.setdefault(vid, 'video')
+    my_dict.setdefault(vid, 'Video')
 for doc in documents:
-    my_dict.setdefault(doc, 'documents')
+    my_dict.setdefault(doc, 'Documents')
 for mus in music:
-    my_dict.setdefault(mus, 'music')
+    my_dict.setdefault(mus, 'Music')
 for arc in archives:
-    my_dict.setdefault(arc, 'archives')
+    my_dict.setdefault(arc, 'Archives')
 
 
 CYRILLIC_SYMBOLS = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґ"
@@ -31,40 +44,97 @@ for c, t in zip(CYRILLIC_SYMBOLS, TRANSLATION):
     TRANS[ord(c)] = t
     TRANS[ord(c.upper())] = t.upper()
 
-def normalize(name):
-    name = name.translate(TRANS)
-    name = re.sub('\W', '_', name)
+def normalize(name: str) -> str:
+    name, *extension = name.split('.')
+    new_name = name.translate(TRANS)
+    new_name = re.sub(r'\W', '_', new_name)
 
-    return name
+    return f"{new_name}.{'.'.join(extension)}"
 
-def move(root_path, path):
-    name = path.stem
-    file_type = path.suffix
+def get_extensions(file_name):
+    return Path(file_name).suffix[1:].upper()
 
-    name_by_file_type = my_dict.get(file_type, 'others')
-    new_name = normalize(name)
-    path_dir = root_path / name_by_file_type
-    path_file = path_dir / new_name
+def move_files(root_path, path):
+    new_name = normalize(path.name)
+    file_type = get_extensions(path)
 
-    if not path_dir.exists():
-        path_dir.mkdir()
+    new_dir = root_path/my_dict.get(file_type, 'Others')
+    new_dir.mkdir(exist_ok=True)
+    path.replace(new_dir/new_name)
 
-    path.replace(path_file)
+def move_archives(root_path, path):
+    file_type = get_extensions(path)
+    new_dir = root_path/my_dict.get(file_type, 'Others')
+    new_dir.mkdir(exist_ok=True)
 
 
+    new_name = normalize(path.name.replace(file_type, ''))
+    archive_folder = new_dir/new_name
+    archive_folder.mkdir(exist_ok=True)
 
-def parse_folder(root_path, path):
-    print('parse_folder', path)
-    for i in path.iterdir():
-        if i.is_file():
-            move(root_path, i)
-        if i.is_dir():
-            parse_folder(root_path, i)
+    try:
+        shutil.unpack_archive(str(path.resolve()), str(archive_folder.resolve()))
+    except shutil.ReadError:
+        archive_folder.rmdir()
+        return
+    except FileNotFoundError:
+        archive_folder.rmdir()
+        return
+    path.unlink()
+
+def scan_folder(root_path, path):
+    for item in path.iterdir():
+        if item.is_dir():
+            if item.name not in folder_list:
+                scan_folder(root_path, item)
+
+        if item.is_file():
+            file_type = item.suffix
+            file_type = file_type.replace('.', '').upper()
+            if file_type not in archives:
+                move_files(root_path, item)
+            else:
+                move_archives(root_path, item)
+            
+            extention = get_extensions(file_name=item.name)
+            try:
+                container = my_dict[extention]
+                Extentions.add(extention)
+            except KeyError:
+                    Unknown_extentions.add(extention)
+ 
+def remove_empty_folders(path):
+    for item in path.iterdir():
+        if item.is_dir():
+            remove_empty_folders(item)
+            try:
+                item.rmdir()
+            except OSError:
+                pass 
 
 def main():
-    path = Path(argv[1])
-    parse_folder(path, path)
-    ...
+     
+    path = Path(sys.argv[1]) 
+    scan_folder(path, path)
+    remove_empty_folders(path)
+
+    if len(Image) != 0:
+        print(f'Image: {Image}')
+    if len(Video) != 0:
+        print(f'Video: {Video}')
+    if len(Documents) != 0:
+        print(f'Documents: {Documents}')
+    if len(Music) != 0:
+        print(f'Music: {Music}')
+    if len(Archives) != 0:
+        print(f'Archives: {Archives}')
+    if len(Others) != 0:
+        print(f'Others: {Others}')
+    if len(Extentions) != 0:
+        print(f'Registered extentions: {Extentions}')
+    if len(Unknown_extentions) != 0:
+        print(f'Unknown extentions: {Unknown_extentions}')
 
 if __name__ == '__main__':
+  
     main()

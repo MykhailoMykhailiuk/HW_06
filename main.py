@@ -3,16 +3,6 @@ import shutil
 import sys
 from pathlib import Path
 
-
-Image = list()
-Video = list()
-Documents = list()
-Music = list()
-Archives = list()
-Others = list()
-Extentions = set()
-Unknown_extentions = set()
-
 image = ['JPEG', 'PNG', 'JPG', 'SVG']
 video = ['AVI', 'MP4', 'MOV', 'MKV']
 documents = ['DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX']
@@ -96,13 +86,6 @@ def scan_folder(root_path, path):
             else:
                 move_archives(root_path, item)
             
-            extention = get_extensions(file_name=item.name)
-            try:
-                container = my_dict[extention]
-                Extentions.add(extention)
-            except KeyError:
-                    Unknown_extentions.add(extention)
- 
 def remove_empty_folders(path):
     for item in path.iterdir():
         if item.is_dir():
@@ -117,23 +100,6 @@ def main():
     path = Path(sys.argv[1]) 
     scan_folder(path, path)
     remove_empty_folders(path)
-
-    if len(Image) != 0:
-        print(f'Image: {Image}')
-    if len(Video) != 0:
-        print(f'Video: {Video}')
-    if len(Documents) != 0:
-        print(f'Documents: {Documents}')
-    if len(Music) != 0:
-        print(f'Music: {Music}')
-    if len(Archives) != 0:
-        print(f'Archives: {Archives}')
-    if len(Others) != 0:
-        print(f'Others: {Others}')
-    if len(Extentions) != 0:
-        print(f'Registered extentions: {Extentions}')
-    if len(Unknown_extentions) != 0:
-        print(f'Unknown extentions: {Unknown_extentions}')
 
 if __name__ == '__main__':
   

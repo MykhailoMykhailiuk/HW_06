@@ -42,6 +42,9 @@ def normalize(name: str) -> str:
     new_name = name.translate(TRANS)
     new_name = re.sub(r'\W', '_', new_name)
 
+    if not extension:
+        return new_name
+    
     return f"{new_name}.{'.'.join(extension)}"
 
 def get_extensions(file_name):

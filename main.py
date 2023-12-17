@@ -9,23 +9,24 @@ documents = ['DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX']
 music = ['MP3', 'OGG', 'WAV', 'AMR']
 archives = ['ZIP', 'GZ', 'TAR'] 
 
-folder_list = ['image', 'video', 'documents', 'music', 'archives', 'others']
+folder_list = ['image', 'video', 'documents', 'audio', 'archives', 'others']
 
+others = list()
 Registered_extention = set()
 Unknown_extention = set()
 
 my_dict = {}
 
 for img in image:
-    my_dict.setdefault(img, 'Image')
+    my_dict.setdefault(img, 'image')
 for vid in video:
-    my_dict.setdefault(vid, 'Video')
+    my_dict.setdefault(vid, 'video')
 for doc in documents:
-    my_dict.setdefault(doc, 'Documents')
+    my_dict.setdefault(doc, 'documents')
 for mus in music:
-    my_dict.setdefault(mus, 'Music')
+    my_dict.setdefault(mus, 'audio')
 for arc in archives:
-    my_dict.setdefault(arc, 'Archives')
+    my_dict.setdefault(arc, 'archives')
 
 CYRILLIC_SYMBOLS = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґ"
 TRANSLATION = ("a", "b", "v", "g", "d", "e", "e", "j", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u",
@@ -50,13 +51,13 @@ def move_files(root_path, path):
     new_name = normalize(path.name)
     file_type = get_extensions(path)
 
-    new_dir = root_path/my_dict.get(file_type, 'Others')
+    new_dir = root_path/my_dict.get(file_type, 'others')
     new_dir.mkdir(exist_ok=True)
     path.replace(new_dir/new_name)
 
 def move_archives(root_path, path):
     file_type = get_extensions(path)
-    new_dir = root_path/my_dict.get(file_type, 'Others')
+    new_dir = root_path/my_dict.get(file_type, 'others')
     new_dir.mkdir(exist_ok=True)
 
 

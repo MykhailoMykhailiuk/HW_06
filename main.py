@@ -71,12 +71,10 @@ def move_archives(root_path, path):
 
     try:
         shutil.unpack_archive(str(path.resolve()), str(archive_folder.resolve()))
-    except shutil.ReadError:
+    except Exception:
         archive_folder.rmdir()
         return
-    except FileNotFoundError:
-        archive_folder.rmdir()
-        return
+
     path.unlink()
 
 def scan_folder(root_path, path):

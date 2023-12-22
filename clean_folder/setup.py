@@ -4,7 +4,7 @@ setup(
     name='clean_folder',
     version='0.0.1',
     description='This package will sort the files of a given folder by extension',
-    url='',
+    url='https://github.com/MykhailoMykhailiuk/HW_06',
     author='Mykhailo Mykhailiuk',
     entry_points={
         'console_scripts':['clean-folder=clean_folder.clean:main']
